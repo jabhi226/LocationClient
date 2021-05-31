@@ -41,14 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = (EditText) findViewById(R.id.editText);
-        editText.setVisibility(View.INVISIBLE);
-
-        textView = (TextView) findViewById(R.id.textView4);
-        infotext = (TextView) findViewById(R.id.info_textview);
-        startButton = (Button) findViewById(R.id.button);
-        stopButton = (Button) findViewById(R.id.button2);
-        stopButton.setVisibility(View.INVISIBLE);
+        initView();
 
         // this will pop-up alert box to allow permission (this will run only at the first launch)
         ActivityCompat.requestPermissions(MainActivity.this , new String[]{Manifest.permission.ACCESS_FINE_LOCATION},10);
@@ -200,6 +193,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initView() {
+        editText = (EditText) findViewById(R.id.editText);
+        editText.setVisibility(View.INVISIBLE);
+        textView = (TextView) findViewById(R.id.textView4);
+        infotext = (TextView) findViewById(R.id.info_textview);
+        startButton = (Button) findViewById(R.id.button);
+        stopButton = (Button) findViewById(R.id.button2);
+        stopButton.setVisibility(View.INVISIBLE);
+    }
+
     //onBackClick
     /*
     @Override
@@ -226,36 +229,35 @@ public void onBackPressed() {
     @Override
     public void onBackPressed() {
         new AlertDialog.Builder(this)
-                //.setIcon(R.drawable.ic_icon_svg1)
-                .setTitle("Location Tracking")
-                .setMessage("Are you sure you want to Sign out?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            .setTitle("Location Tracking")
+            .setMessage("Are you sure you want to Sign out?")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-                        if(timer!=null){
-                            timer.cancel();
-                            timer=null;
-                        }
-
-                        if(counter) {
-                            counter = false;
-                            Toast.makeText(getApplicationContext(), "Location Service Has Been Stoped", Toast.LENGTH_SHORT).show();
-
-                            String lat = "0";
-                            String lon = "0";
-
-                            Context context1 = MainActivity.this;
-                            MyBackgroundTask myBackgroundTask = new MyBackgroundTask(context1);
-                            myBackgroundTask.execute(lat, lon, driver_username);
-                        }
-                        finish();
+                    if(timer!=null){
+                        timer.cancel();
+                        timer=null;
                     }
 
-                })
-                .setNegativeButton("No", null)
-                .show();
+                    if(counter) {
+                        counter = false;
+                        Toast.makeText(getApplicationContext(), "Location Service Has Been Stoped", Toast.LENGTH_SHORT).show();
+
+                        String lat = "0";
+                        String lon = "0";
+
+                        Context context1 = MainActivity.this;
+                        MyBackgroundTask myBackgroundTask = new MyBackgroundTask(context1);
+                        myBackgroundTask.execute(lat, lon, driver_username);
+                    }
+                    finish();
+                }
+
+            })
+            .setNegativeButton("No", null)
+            .show();
     }
 
     //this function will start the service
