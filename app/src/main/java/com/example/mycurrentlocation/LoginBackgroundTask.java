@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,22 +28,19 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
     Context context;
     AlertDialog alertDialog;
 
-    public LoginBackgroundTask(Context ctx,Activity acti){
+    public LoginBackgroundTask(Context ctx,Activity activity){
         context = ctx;
-        activity = acti;
+        this.activity = activity;
     }
 
     @Override
     protected void onPreExecute() {
-        //super.onPreExecute();
-
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-
         LayoutInflater layoutInflater = activity.getLayoutInflater();
         builder.setView(layoutInflater.inflate(R.layout.logging_in_alert_box, null));
-
         builder.setCancelable(false);
         alertDialog = builder.create();
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
         alertDialog.show();
     }
 
@@ -62,7 +61,6 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
 
             URL url = new URL(link);
             URLConnection conn = url.openConnection();
-
             conn.setDoOutput(true);
 
             OutputStreamWriter outputStreamWriter = null;
@@ -72,7 +70,6 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
             catch (IOException e) {
                 return "Server is Off";
             }
-
             outputStreamWriter.write(data);
             outputStreamWriter.flush();
 
@@ -84,10 +81,8 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
 
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
-                Log.e("doInBackground", "doInBackground: append done");
-                break;
+                Log.e("doInBackground", "stringBuilder.append(line): "+line);
             }
-
             return stringBuilder.toString();
         }
         catch (UnsupportedEncodingException e) {
@@ -104,10 +99,7 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
 
     @Override
     protected void onPostExecute(String s) {
-
         alertDialog.dismiss();
-
-        //super.onPostExecute(s);
         if (s.equals(username)){
             Intent intent = new Intent(activity, MainActivity.class);
             intent.putExtra("driver_username_key",username);
@@ -116,10 +108,5 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
         else{
             Toast.makeText(context,s,Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    protected void onProgressUpdate(Void... values) {
-        super.onProgressUpdate(values);
     }
 }
