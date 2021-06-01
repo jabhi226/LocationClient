@@ -26,6 +26,8 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".LocationTackerService"/>
+
     </application>
 
 </manifest>

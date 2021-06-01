@@ -50,7 +50,7 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
         String password = parameters[1];
 
 //        String link = "http://192.168.43.17:8080/location/Login.php";
-        String link = "http://192.168.0.107:8080/location/Login.php";
+        String link = "http://192.168.0.103:8080/location/Login.php";
 //        String link = "http://10.0.2.2:8080/location/Login.php";
 
         try {

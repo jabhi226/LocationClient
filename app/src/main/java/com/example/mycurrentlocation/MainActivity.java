@@ -2,7 +2,6 @@ package com.example.mycurrentlocation;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
@@ -22,19 +21,22 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
     Timer timer;
     Button stopButton,startButton;
     TextView textView,infotext;
     String driver_username;
     Boolean counter = false;
     EditText editText;
+    RelativeLayout.LayoutParams layoutParams;
+    int width,height;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,151 +48,9 @@ public class MainActivity extends AppCompatActivity {
         // this will pop-up alert box to allow permission (this will run only at the first launch)
         ActivityCompat.requestPermissions(MainActivity.this , new String[]{Manifest.permission.ACCESS_FINE_LOCATION},10);
 
-        //retriveing username of the driver
         driver_username = getIntent().getExtras().getString("driver_username_key","defaultKey");
-
         textView.setText("Uesename : "+driver_username);
         infotext.setText("Tap below button to Start");
-
-        //try : start and stop service on touch listener
-        final Drawable dr = getResources().getDrawable(R.drawable.login_btn);
-        final Drawable dr1 = getResources().getDrawable(R.drawable.login_btn2);
-
-        //start location service
-        startButton.setOnTouchListener(new View.OnTouchListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) v.getLayoutParams();
-                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
-                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
-
-                if(MotionEvent.ACTION_DOWN == event.getAction())
-                {
-                    counter = true;
-
-                    Vibrator vibrator1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator1.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
-                    } else {
-                        //deprecated in API 26
-                        vibrator1.vibrate(30);
-                    }
-
-                    startButton.setTextSize(23);
-                    layoutParams.width = width + 30;
-                    layoutParams.height = height + 5;
-                    startButton.setLayoutParams(layoutParams);
-                    startButton.setBackground(dr);
-
-
-                    infotext.setText("Location is beeing tracked");
-
-                    /*
-                    startButton.setTextSize(20);
-                    layoutParams.width = width;
-                    layoutParams.height = height;
-                    startButton.setLayoutParams(layoutParams);
-
-                    startButton.setTextSize(23);
-                    layoutParams.width = width + 30;
-                    layoutParams.height = height + 5;
-                    startButton.setLayoutParams(layoutParams);
-
-                     */
-                }
-                if(MotionEvent.ACTION_UP == event.getAction())
-                {
-                    startButton.setTextSize(20);
-                    layoutParams.width = width;
-                    layoutParams.height = height;
-                    startButton.setLayoutParams(layoutParams);
-                    startButton.setBackground(dr1);
-
-                    /*startButton.setTextSize(23);
-                    layoutParams.width = width + 30;
-                    layoutParams.height = height + 5;
-                    startButton.setLayoutParams(layoutParams);
-
-                    startButton.setTextSize(20);
-                    layoutParams.width = width;
-                    layoutParams.height = height;
-                    startButton.setLayoutParams(layoutParams);
-
-                     */
-
-                    stopButton.setVisibility(View.VISIBLE);
-                    startButton.setVisibility(View.INVISIBLE);
-
-                    timer = new Timer();
-                    timer.schedule(new RepeaterClass(getApplicationContext()),0,5000);
-                }
-                return true;
-            }
-        });
-
-        //stop location service
-        stopButton.setOnTouchListener(new View.OnTouchListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) v.getLayoutParams();
-                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
-                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
-
-                if(MotionEvent.ACTION_DOWN == event.getAction())
-                {
-                    stopButton.setTextSize(23);
-                    layoutParams.width = width + 30;
-                    layoutParams.height = height + 5;
-                    stopButton.setLayoutParams(layoutParams);
-                    stopButton.setBackground(dr);
-
-                    Vibrator vibrator1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        vibrator1.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
-                    } else {
-                        //deprecated in API 26
-                        vibrator1.vibrate(30);
-                    }
-                }
-                if(MotionEvent.ACTION_UP == event.getAction())
-                {
-                    stopButton.setTextSize(20);
-                    layoutParams.width = width;
-                    layoutParams.height = height;
-                    stopButton.setLayoutParams(layoutParams);
-                    stopButton.setBackground(dr1);
-
-                    stopButton.setVisibility(View.INVISIBLE);
-                    startButton.setVisibility(View.VISIBLE);
-
-                    infotext.setText("Tap below button to Start");
-
-                    if(timer!=null){
-                        timer.cancel();
-                        timer=null;
-                    }
-                    if(counter)
-                    {
-                        counter = false;
-                        Toast.makeText(getApplicationContext(),"Location Service Has Been Stoped",Toast.LENGTH_SHORT).show();
-
-                        String lat = "0";
-                        String lon = "0";
-
-                        Context context1 = MainActivity.this;
-                        MyBackgroundTask myBackgroundTask = new MyBackgroundTask(context1);
-                        myBackgroundTask.execute(lat,lon,driver_username);
-                    }
-                }
-                return true;
-            }
-        });
     }
 
     private void initView() {
@@ -201,30 +61,126 @@ public class MainActivity extends AppCompatActivity {
         startButton = (Button) findViewById(R.id.button);
         stopButton = (Button) findViewById(R.id.button2);
         stopButton.setVisibility(View.INVISIBLE);
+        startButton.setOnTouchListener(this);
+        stopButton.setOnTouchListener(this);
     }
 
-    //onBackClick
-    /*
     @Override
-public void onBackPressed() {
-    new AlertDialog.Builder(this)
-        .setIcon(android.R.drawable.ic_dialog_alert)
-        .setTitle("Closing Activity")
-        .setMessage("Are you sure you want to close this activity?")
-        .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-    {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            finish();
+    public boolean onTouch(View v, MotionEvent event) {
+        layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
+        height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 65, getResources().getDisplayMetrics());
+        width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
+
+        if(v.getId() == startButton.getId()){
+            startLocationService(event);
         }
+        else if(v.getId() == stopButton.getId()){
+            stopLocationService(event);
+        }
+        return true;
+    }
 
-    })
-    .setNegativeButton("No", null)
-    .show();
-}
-     */
+    private void startLocationService(MotionEvent event) {
 
-    //.setIcon(android.R.drawable.ic_dialog_alert)
+        if(MotionEvent.ACTION_DOWN == event.getAction())
+        {
+            counter = true;
+
+            Vibrator vibrator1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator1.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                vibrator1.vibrate(30);
+            }
+
+            startButton.setTextSize(23);
+            layoutParams.width = width + 30;
+            layoutParams.height = height + 5;
+            startButton.setLayoutParams(layoutParams);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                final Drawable dr = getResources().getDrawable(R.drawable.login_btn);
+                startButton.setBackground(dr);
+            }
+
+            infotext.setText("Location is beeing tracked");
+        }
+        if(MotionEvent.ACTION_UP == event.getAction())
+        {
+            startButton.setTextSize(20);
+            layoutParams.width = width;
+            layoutParams.height = height;
+            startButton.setLayoutParams(layoutParams);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                final Drawable dr1 = getResources().getDrawable(R.drawable.login_btn2);
+                startButton.setBackground(dr1);
+            }
+
+            stopButton.setVisibility(View.VISIBLE);
+            startButton.setVisibility(View.INVISIBLE);
+
+            timer = new Timer();
+            timer.schedule(new RepeaterClass(getApplicationContext()),0,5000);
+            //Todo (start service here and in service start timer)
+        }
+    }
+
+    private void stopLocationService(MotionEvent event) {
+
+        if(MotionEvent.ACTION_DOWN == event.getAction())
+        {
+            stopButton.setTextSize(23);
+            layoutParams.width = width + 30;
+            layoutParams.height = height + 5;
+            stopButton.setLayoutParams(layoutParams);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                final Drawable dr = getResources().getDrawable(R.drawable.login_btn);
+                stopButton.setBackground(dr);
+            }
+
+            Vibrator vibrator1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator1.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                //deprecated in API 26
+                vibrator1.vibrate(30);
+            }
+        }
+        if(MotionEvent.ACTION_UP == event.getAction())
+        {
+            stopButton.setTextSize(20);
+            layoutParams.width = width;
+            layoutParams.height = height;
+            stopButton.setLayoutParams(layoutParams);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                final Drawable dr1 = getResources().getDrawable(R.drawable.login_btn2);
+                stopButton.setBackground(dr1);
+            }
+
+            stopButton.setVisibility(View.INVISIBLE);
+            startButton.setVisibility(View.VISIBLE);
+
+            infotext.setText("Tap below button to Start");
+
+            if(timer != null){
+                timer.cancel();
+                timer = null;
+            }
+            if(counter)
+            {
+                counter = false;
+                Toast.makeText(getApplicationContext(),"Location Service Has Stop",Toast.LENGTH_SHORT).show();
+
+                String lat = "0";
+                String lon = "0";
+
+                Context context1 = MainActivity.this;
+                MyBackgroundTask myBackgroundTask = new MyBackgroundTask(context1);
+                myBackgroundTask.execute(lat,lon,driver_username);
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -259,40 +215,6 @@ public void onBackPressed() {
             .setNegativeButton("No", null)
             .show();
     }
-
-    //this function will start the service
-    /*
-    public void findMyLocation(View view) {
-        stopButton.setVisibility(View.VISIBLE);
-        startButton.setVisibility(View.INVISIBLE);
-
-        timer = new Timer();
-        timer.schedule(new RepeaterClass(getApplicationContext()),0,5000);
-
-        android:onClick="findMyLocation"
-    }
-
-
-    //this function will stop service
-    public void stopGettingLocation(View view) {
-        startButton.setVisibility(View.VISIBLE);
-        stopButton.setVisibility(View.INVISIBLE);
-        if(timer!=null){
-            timer.cancel();
-            timer=null;
-        }
-        Toast.makeText(getApplicationContext(),"Location Service Has Been Stoped",Toast.LENGTH_SHORT).show();
-
-        String lat = "0";
-        String lon = "0";
-
-        Context context1 = MainActivity.this;
-        MyBackgroundTask myBackgroundTask = new MyBackgroundTask(context1);
-        myBackgroundTask.execute(lat,lon,driver_username);
-
-        android:onClick="stopGettingLocation"
-    }
-*/
 
     //this will repeat the service
     class RepeaterClass extends TimerTask{

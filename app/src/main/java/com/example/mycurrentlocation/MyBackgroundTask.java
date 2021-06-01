@@ -29,7 +29,7 @@ public class MyBackgroundTask extends AsyncTask<String,Void,String> {
         String driver_UN = parameter[2];
 
 //        String link = "http://192.168.43.17:8080/location/driver_location.php";
-        String link = "http://192.168.0.107:8080/location/driver_location.php";
+        String link = "http://192.168.0.103:8080/location/driver_location.php";
 //        String link = "http://10.0.2.2:8080/location/driver_location.php";
 
         try{

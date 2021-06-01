@@ -1,9 +1,12 @@
 package com.example.mycurrentlocation;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,18 +22,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-/*
-
-Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-// Vibrate for 500 milliseconds
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
-} else {
-    //deprecated in API 26
-    v.vibrate(500);
-}
-
- */
 public class Login_Activity extends AppCompatActivity implements View.OnTouchListener {
     EditText userName,passWord;
     Button loginButton;
@@ -44,6 +35,8 @@ public class Login_Activity extends AppCompatActivity implements View.OnTouchLis
         setContentView(R.layout.activity_login_);
 
         initView();
+
+        ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.ACCESS_FINE_LOCATION},10);
     }
 
     private void initView() {
@@ -61,27 +54,18 @@ public class Login_Activity extends AppCompatActivity implements View.OnTouchLis
     public boolean onTouch(View v, MotionEvent event) {
 
         if(v.getId() == loginButton.getId()){
-            Toast.makeText(getApplicationContext(),"login",Toast.LENGTH_SHORT).show();
             layoutParams = (RelativeLayout.LayoutParams) v.getLayoutParams();
 
             if(MotionEvent.ACTION_DOWN == event.getAction())
             {
                 onBtnDown();
+//                Intent i = new Intent(this,LocationTackerService.class);
+//                startService(i);
             }
             if(MotionEvent.ACTION_UP == event.getAction()) {
                 onBtnUp();
             }
         }
-            /*
-            //startActivity(new Intent(Login_Activity.this, MainActivity.class));
-            Context context = Login_Activity.this;
-            Activity activity = Login_Activity.this;
-
-            Toast.makeText(getApplicationContext(),"UP",Toast.LENGTH_SHORT).show();
-
-            LoginBackgroundTask loginBackgroundTask = new LoginBackgroundTask(context,activity);
-            loginBackgroundTask.execute(UN,PW);
-             */
         return true;
     }
 
@@ -123,16 +107,4 @@ public class Login_Activity extends AppCompatActivity implements View.OnTouchLis
             vibrator1.vibrate(30);
         }
     }
-
-    /*public void User_Login(View view) {
-        String UN = userName.getText().toString();
-        String PW = passWord.getText().toString();
-
-        //startActivity(new Intent(Login_Activity.this, MainActivity.class));
-
-        LoginBackgroundTask loginBackgroundTask = new LoginBackgroundTask(this,this);
-        loginBackgroundTask.execute(UN,PW);
-    }
-
-     */
 }

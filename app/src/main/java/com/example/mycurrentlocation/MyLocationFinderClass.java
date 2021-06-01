@@ -1,13 +1,13 @@
 package com.example.mycurrentlocation;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -15,6 +15,9 @@ import androidx.core.content.ContextCompat;
 public class MyLocationFinderClass implements LocationListener {
 
     Context context;
+    Location gpsLocation = null;
+    Location netLocation = null;
+    Location passiveLocation = null;
 
     public MyLocationFinderClass(Context applicationContext) {
         context = applicationContext;
@@ -37,10 +40,6 @@ public class MyLocationFinderClass implements LocationListener {
         //check if GPS is ON or OFF
         isGPSOn = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         isNetworkOn = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-        Location gpsLocation = null;
-        Location netLocation = null;
-        Location passiveLocation = null;
 
         if(!isGPSOn){
             Toast.makeText(context,"GPS is Disabled",Toast.LENGTH_SHORT).show();
