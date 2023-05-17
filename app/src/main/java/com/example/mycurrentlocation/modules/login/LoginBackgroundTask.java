@@ -1,15 +1,14 @@
-package com.example.mycurrentlocation;
+package com.example.mycurrentlocation.modules.login;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.Toast;
+
+import com.example.mycurrentlocation.modules.home.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,17 +30,6 @@ public class LoginBackgroundTask extends AsyncTask<String,Void,String> {
     public LoginBackgroundTask(Context ctx,Activity activity){
         context = ctx;
         this.activity = activity;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        LayoutInflater layoutInflater = activity.getLayoutInflater();
-        builder.setView(layoutInflater.inflate(R.layout.logging_in_alert_box, null));
-        builder.setCancelable(false);
-        alertDialog = builder.create();
-        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
-        alertDialog.show();
     }
 
     @Override
