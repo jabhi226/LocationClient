@@ -1,4 +1,4 @@
-package com.example.mycurrentlocation;
+package com.example.mycurrentlocation.modules.home.service;
 
 import android.Manifest;
 import android.app.Service;

@@ -21,7 +21,7 @@
         android:layout_marginLeft="60dp"
         android:text="Welcome"
         android:textSize="50sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/textView3"
@@ -31,7 +31,7 @@
         android:layout_marginLeft="60dp"
         android:layout_marginBottom="20dp"
         android:text="Please Login To Continue"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/driver_UN"
@@ -42,11 +42,12 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/textbox_look"
         android:drawableLeft="@drawable/ic_person_black_24dp"
+        android:drawablePadding="8dp"
         android:ems="10"
         android:hint="Username"
         android:inputType="textPersonName"
         android:paddingLeft="10dp"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/driver_PW"
@@ -57,12 +58,12 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/textbox_look"
         android:drawableLeft="@drawable/ic_lock_black_24dp"
-        android:drawablePadding="2dp"
+        android:drawablePadding="8dp"
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingLeft="10dp"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/loginButton"
@@ -74,5 +75,23 @@
         android:text="Log in"
         android:textAllCaps="false"
         android:textColor="#ffffff"
-        android:textSize="20dp"/>
+        android:textSize="20dp" />
+
+    <EditText
+        android:visibility="gone"
+        android:id="@+id/ip_address"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/loginButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/textbox_look"
+        android:drawableLeft="@drawable/ic_lock_black_24dp"
+        android:drawablePadding="8dp"
+        android:ems="10"
+        android:text="192.168.0.106"
+        android:hint="Ip Address"
+        android:paddingLeft="10dp"
+        android:textSize="20sp" />
 </RelativeLayout>

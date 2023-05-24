@@ -1,7 +1,6 @@
 package com.example.mycurrentlocation.modules.login.data
 
 import com.example.mycurrentlocation.modules.login.models.LoginSuccessResponse
-import com.example.mycurrentlocation.utils.Endpoints
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,12 +9,12 @@ import java.lang.Exception
 
 class LoginApiCalls(private val loginEvents: LoginEventsResponse) {
 
-    fun login(un: String, pw: String) {
-        try {
-            Thread {
+    fun login(un: String, pw: String, ip: String) {
+        Thread {
+            try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("http://${Endpoints.IP}:3001/driver/login?username=$un&password=$pw")
+                    .url("http://$ip:3001/driver/login?username=$un&password=$pw")
                     .addHeader("Content-Type", "application/json")
                     .build()
                 val response = client.newCall(request).execute()
@@ -39,10 +38,10 @@ class LoginApiCalls(private val loginEvents: LoginEventsResponse) {
                         loginEvents.onLoginError("Something went wrong.")
                     }
                 }
-            }.start()
-        } catch (e: Exception){
-            e.printStackTrace()
-            loginEvents.onLoginError("Something went wrong.")
-        }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                loginEvents.onLoginError("Something went wrong.\nMay be check network connection.")
+            }
+        }.start()
     }
 }

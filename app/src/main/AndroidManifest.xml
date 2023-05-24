@@ -18,7 +18,7 @@
         android:usesCleartextTraffic="true">
 
         <activity
-            android:name=".modules.home.MainActivity"
+            android:name=".modules.home.ui.MainActivity"
             android:exported="true" />
 
         <activity
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".LocationTackerService" />
+        <service android:name=".modules.home.service.LocationTackerService" />
 
     </application>
 

@@ -1,4 +1,4 @@
-package com.example.mycurrentlocation;
+package com.example.mycurrentlocation.modules.home.service;
 
 import android.Manifest;
 import android.app.Activity;
@@ -8,9 +8,17 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Dispatchers;
+import kotlinx.coroutines.GlobalScope;
 
 public class MyLocationFinderClass implements LocationListener {
 
@@ -29,8 +37,8 @@ public class MyLocationFinderClass implements LocationListener {
         boolean isGPSOn;
         boolean isNetworkOn;
 
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(context,"permission required",Toast.LENGTH_SHORT).show();
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(context, "permission required", Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -41,61 +49,54 @@ public class MyLocationFinderClass implements LocationListener {
         isGPSOn = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         isNetworkOn = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-        if(!isGPSOn){
-            Toast.makeText(context,"GPS is Disabled",Toast.LENGTH_SHORT).show();
-            Location location1 = null;
-            return location1;
-        }
-        if(isGPSOn){
+        if (!isGPSOn) {
+            Toast.makeText(context, "GPS is Disabled", Toast.LENGTH_SHORT).show();
+            return null;
+        } else {
             //request to update the location
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,this);
+
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             //will get last known location and return in type of Location
             gpsLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         }
-        if(isNetworkOn){
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
+        if (isNetworkOn) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             netLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
 
         //return location
         if (gpsLocation != null && netLocation != null) {
             if (gpsLocation.getTime() < netLocation.getTime()) {
-                    String GPS = String.valueOf(gpsLocation.getTime() / 1000);
-                    String NW = String.valueOf(netLocation.getTime() / 1000);
-                    Toast.makeText(context, "GPS is being used\ngps : " + GPS + "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
-                    return gpsLocation;
+                String GPS = String.valueOf(gpsLocation.getTime() / 1000);
+                String NW = String.valueOf(netLocation.getTime() / 1000);
+                Toast.makeText(context, "GPS is being used\ngps : " + GPS + "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
+                return gpsLocation;
             } else {
-                    String GPS = String.valueOf(gpsLocation.getTime() / 1000);
-                    String NW = String.valueOf(netLocation.getTime() / 1000);
-                    Toast.makeText(context, "Network is being used\ngps : " + GPS + "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
-                    return netLocation;
+                String GPS = String.valueOf(gpsLocation.getTime() / 1000);
+                String NW = String.valueOf(netLocation.getTime() / 1000);
+                Toast.makeText(context, "Network is being used\ngps : " + GPS + "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
+                return netLocation;
             }
-        }
-        else if(gpsLocation != null && netLocation == null)
-        {
+        } else if (gpsLocation != null) {
             String GPS = String.valueOf(gpsLocation.getTime() / 1000);
             //String NW = String.valueOf(netLocation.getTime() / 1000);
             Toast.makeText(context, "GPS is being used\ngps : " + GPS + "\nnw  : " + "NW", Toast.LENGTH_SHORT).show();
             return gpsLocation;
-        }
-        else if(gpsLocation == null && netLocation != null)
-        {
+        } else if (netLocation != null) {
             //String GPS = String.valueOf(gpsLocation.getTime() / 1000);
             String NW = String.valueOf(netLocation.getTime() / 1000);
-            Toast.makeText(context, "Network is being used\ngps : " + "GPS "+ "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Network is being used\ngps : " + "GPS " + "\nnw  : " + NW, Toast.LENGTH_SHORT).show();
             return netLocation;
-        }
-        else{
+        } else {
             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 0, 0, this);
             passiveLocation = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
 
-            if(passiveLocation != null){
-                String passive = String.valueOf(passiveLocation.getTime()/1000);
-                Toast.makeText(context,"Passive Location is Used\npassive : "+passive+"\nTry Outside",Toast.LENGTH_SHORT).show();
+            if (passiveLocation != null) {
+                String passive = String.valueOf(passiveLocation.getTime() / 1000);
+                Toast.makeText(context, "Passive Location is Used\npassive : " + passive + "\nTry Outside", Toast.LENGTH_SHORT).show();
                 return passiveLocation;
-            }
-            else {
-                Toast.makeText(context,"Unable to get Location",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Unable to get Location", Toast.LENGTH_SHORT).show();
                 return null;
             }
         }

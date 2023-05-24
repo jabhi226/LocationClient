@@ -1,8 +1,7 @@
-package com.example.mycurrentlocation;
+package com.example.mycurrentlocation.modules.home.service;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,10 +13,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-public class MyBackgroundTask extends AsyncTask<String,Void,String> {
+public class OldMyBackgroundTask extends AsyncTask<String,Void,String> {
 
     Context context;
-    public MyBackgroundTask(Context ctx){
+    public OldMyBackgroundTask(Context ctx){
         context = ctx;
     }
 

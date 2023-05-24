@@ -1,11 +1,8 @@
-package com.example.mycurrentlocation.modules.home
+package com.example.mycurrentlocation.modules.home.ui
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.TypedValue
@@ -19,11 +16,17 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.example.mycurrentlocation.MyBackgroundTask
-import com.example.mycurrentlocation.MyLocationFinderClass
+import androidx.core.content.ContextCompat
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.mycurrentlocation.R
+import com.example.mycurrentlocation.modules.home.service.BackgroundWorker
+import com.example.mycurrentlocation.modules.login.models.Driver
+import com.example.mycurrentlocation.utils.SharedPref
+import com.example.mycurrentlocation.utils.dateToStringConverter
+import java.util.Date
 import java.util.Timer
-import java.util.TimerTask
 
 class MainActivity : AppCompatActivity(), OnTouchListener {
     private var timer: Timer? = null
@@ -32,6 +35,7 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
     private var textView: TextView? = null
     private var infoText: TextView? = null
     private var driverUsername: String? = null
+    private var driver: Driver? = null
     private var counter = false
     private var editText: EditText? = null
     private var layoutParams: RelativeLayout.LayoutParams? = null
@@ -41,6 +45,7 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
+        SharedPref.setString(this, "LOGS", "")
 
         // this will pop-up alert box to allow permission (this will run only at the first launch)
         ActivityCompat.requestPermissions(
@@ -48,8 +53,9 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
             10
         )
-        driverUsername = intent.extras?.getString("driver_username_key", "defaultKey")
-        textView?.text = "Uesename : $driverUsername"
+        val bundle = intent.getBundleExtra("bundle")
+        driver = bundle?.getParcelable("driver")
+        textView?.text = "Uesename : ${driver?.username}"
         infoText?.text = "Tap below button to Start"
     }
 
@@ -95,7 +101,7 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
             layoutParams?.width = width + 30
             layoutParams?.height = height + 5
             startButton?.layoutParams = layoutParams
-            val dr = resources.getDrawable(R.drawable.login_btn)
+            val dr = ContextCompat.getDrawable(this, R.drawable.login_btn)
             startButton?.background = dr
             infoText?.text = "Location is beeing tracked"
         }
@@ -104,13 +110,21 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
             layoutParams?.width = width
             layoutParams?.height = height
             startButton?.layoutParams = layoutParams
-            val dr1 = resources.getDrawable(R.drawable.login_btn2)
+            val dr1 = ContextCompat.getDrawable(this, R.drawable.login_btn2)
             startButton?.background = dr1
             stopButton?.visibility = View.VISIBLE
             startButton?.visibility = View.INVISIBLE
-            timer = Timer()
-            timer?.schedule(RepeaterClass(applicationContext), 0, 5000)
-            //Todo (start service here and in service start timer)
+
+            val workerRequest =
+                OneTimeWorkRequestBuilder<BackgroundWorker>()
+                    .addTag(BackgroundWorker::class.java.simpleName)
+                    .build()
+            WorkManager.getInstance(this).enqueueUniqueWork(
+                "BackgroundWorker",
+                ExistingWorkPolicy.KEEP,
+                workerRequest
+            )
+            return
         }
     }
 
@@ -120,49 +134,29 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
             layoutParams?.width = width + 30
             layoutParams?.height = height + 5
             stopButton?.layoutParams = layoutParams
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                val dr = resources.getDrawable(R.drawable.login_btn)
-                stopButton?.background = dr
-            }
+            val dr = ContextCompat.getDrawable(this, R.drawable.login_btn)
+            stopButton?.background = dr
             val vibrator1 = getSystemService(VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator1.vibrate(
-                    VibrationEffect.createOneShot(
-                        30,
-                        VibrationEffect.DEFAULT_AMPLITUDE
-                    )
+            vibrator1.vibrate(
+                VibrationEffect.createOneShot(
+                    30,
+                    VibrationEffect.DEFAULT_AMPLITUDE
                 )
-            } else {
-                //deprecated in API 26
-                vibrator1.vibrate(30)
-            }
+            )
         }
         if (MotionEvent.ACTION_UP == event.action) {
             stopButton?.textSize = 20f
             layoutParams?.width = width
             layoutParams?.height = height
             stopButton?.layoutParams = layoutParams
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                val dr1 = resources.getDrawable(R.drawable.login_btn2)
-                stopButton?.background = dr1
-            }
+            val dr1 = ContextCompat.getDrawable(this, R.drawable.login_btn2)
+            stopButton?.background = dr1
             stopButton?.visibility = View.INVISIBLE
             startButton?.visibility = View.VISIBLE
             infoText?.text = "Tap below button to Start"
-            if (timer != null) {
-                timer?.cancel()
-                timer = null
-            }
-            if (counter) {
-                counter = false
-                Toast.makeText(applicationContext, "Location Service Has Stop", Toast.LENGTH_SHORT)
-                    .show()
-                val lat = "0"
-                val lon = "0"
-                val context1: Context = this@MainActivity
-                val myBackgroundTask = MyBackgroundTask(context1)
-                myBackgroundTask.execute(lat, lon, driverUsername)
-            }
+            WorkManager.getInstance(this)
+                .cancelAllWorkByTag(BackgroundWorker::class.java.simpleName)
+            return
         }
     }
 
@@ -182,11 +176,6 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
                         "Location Service Has Been Stoped",
                         Toast.LENGTH_SHORT
                     ).show()
-                    val lat = "0"
-                    val lon = "0"
-                    val context1: Context = this@MainActivity
-                    val myBackgroundTask = MyBackgroundTask(context1)
-                    myBackgroundTask.execute(lat, lon, driverUsername)
                 }
                 finish()
             }
@@ -194,34 +183,4 @@ class MainActivity : AppCompatActivity(), OnTouchListener {
             .show()
     }
 
-    //this will repeat the service
-    internal inner class RepeaterClass(var context: Context) : TimerTask() {
-        var editText: EditText? = null
-        var context1: Context = this@MainActivity
-
-        //MyLocationFinderClass will access the current location
-        var myLocationFinderClass = MyLocationFinderClass(applicationContext)
-        var handler = Handler()
-        override fun run() {
-            handler.post {
-                //location will contain the current location attribute
-                val location = myLocationFinderClass.location
-                if (location != null) {
-                    val lat = location.latitude.toString()
-                    val lon = location.longitude.toString()
-                    val myBackgroundTask = MyBackgroundTask(context1)
-                    myBackgroundTask.execute(lat, lon, driverUsername)
-                    editText = findViewById<View>(R.id.editText) as EditText
-                    editText?.setText("$lat,$lon")
-                    editText?.visibility = View.INVISIBLE
-
-                    //Toast.makeText(getApplicationContext(),"New Location Set",Toast.LENGTH_SHORT).show();
-                    //Toast.makeText(getApplicationContext(),"Location Successfully Accessed",Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(applicationContext, "location null", Toast.LENGTH_SHORT).show()
-                    //stopGettingLocation(null);
-                }
-            }
-        }
-    }
 }

@@ -21,15 +21,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.mycurrentlocation.R
-import com.example.mycurrentlocation.modules.home.MainActivity
+import com.example.mycurrentlocation.modules.home.ui.MainActivity
 import com.example.mycurrentlocation.modules.login.data.LoginApiCalls
 import com.example.mycurrentlocation.modules.login.data.LoginEventsResponse
 import com.example.mycurrentlocation.modules.login.models.Driver
+import com.example.mycurrentlocation.utils.SharedPref
 
 class LoginActivity : AppCompatActivity(), OnTouchListener, LoginEventsResponse {
 
     private var userName: EditText? = null
     private var passWord: EditText? = null
+    private var ipAddress: EditText? = null
     private var loginButton: Button? = null
     private var img: ImageView? = null
     private var alertDialog: AlertDialog? = null
@@ -51,6 +53,7 @@ class LoginActivity : AppCompatActivity(), OnTouchListener, LoginEventsResponse 
 
     private fun initView() {
         userName = findViewById(R.id.driver_UN)
+        ipAddress = findViewById(R.id.ip_address)
         passWord = findViewById<View>(R.id.driver_PW) as EditText
         loginButton = findViewById<View>(R.id.loginButton) as Button
         img = findViewById<View>(R.id.imageView) as ImageView
@@ -61,6 +64,12 @@ class LoginActivity : AppCompatActivity(), OnTouchListener, LoginEventsResponse 
         width =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 250f, resources.displayMetrics)
                 .toInt()
+
+        findViewById<View>(R.id.textView2)?.setOnLongClickListener {
+            ipAddress?.visibility = View.VISIBLE
+            true
+        }
+        ipAddress?.setText(SharedPref.getString(this, SharedPref.IP_ADDRESS))
     }
 
     override fun onTouch(v: View, event: MotionEvent): Boolean {
@@ -86,7 +95,8 @@ class LoginActivity : AppCompatActivity(), OnTouchListener, LoginEventsResponse 
         val un = userName?.text.toString()
         val pw = passWord?.text.toString()
         showLoader()
-        apiCall.login(un, pw)
+        SharedPref.setString(this, SharedPref.IP_ADDRESS, ipAddress?.text.toString().trim())
+        apiCall.login(un, pw, ipAddress?.text.toString().trim())
     }
 
     private fun showLoader() {
@@ -109,12 +119,14 @@ class LoginActivity : AppCompatActivity(), OnTouchListener, LoginEventsResponse 
         vibrator1.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
-    override fun onLoginResponse(event: Driver?) {
+    override fun onLoginResponse(driver: Driver?) {
         runOnUiThread {
             alertDialog?.dismiss()
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("driver_username_key", event?.username)
-            intent.putExtra("driver", event)
+            val bundle = Bundle()
+            bundle.putString("driver_username_key", driver?.username)
+            bundle.putParcelable("driver", driver)
+            intent.putExtra("bundle", bundle)
             startActivity(intent)
         }
     }
